@@ -28,7 +28,7 @@ const initialiseDbAndServer = async () => {
 };
 initialiseDbAndServer();
 
-app.get("/", async (request, response) => {
+app.get("/user", async (request, response) => {
   const getUserQuery = `SELECT * FROM user WHERE name = "kishore";`;
   const userDetails = await db.get(getUserQuery);
   response.send(userDetails);
@@ -40,23 +40,30 @@ app.post("/login", async (request, response) => {
 
   const userQuery = `SELECT * FROM user WHERE email='${email}';`;
 
-  const dbUser = await db.run(userQuery);
+  const dbUser = await db.get(userQuery);
+  console.log(dbUser);
 
   if (dbUser === undefined) {
     response.status(400);
     response.send("Invalid User");
   } else {
     if (password === dbUser.password) {
+      console.log("password user");
       if (password.length < 8) {
+        console.log("hey");
         response.send("Password length must be 8 characters");
       } else {
+        console.log("password also matched");
         const payLoad = {
           email: email,
         };
         const jwtToken = jwt.sign(payLoad, "secret_token");
+        console.log(jwtToken);
         response.status(200);
         response.send({ jwtToken });
       }
+    } else {
+      response.send("Invalid Password");
     }
   }
 });
